@@ -1,0 +1,91 @@
+/// Truck deliveries between sites.
+table Deliveries
+
+	measure 'Delivery Count' = COUNTROWS(Deliveries)
+		formatString: #,0
+		displayFolder: Logistics
+
+	measure 'Avg Transit Minutes' = AVERAGE(Deliveries[TransitMinutes])
+		formatString: #,0
+		displayFolder: Logistics
+
+	measure 'Tons Delivered' = SUM(Deliveries[WeightTons])
+		formatString: #,0
+		displayFolder: Logistics
+
+	column DeliveryId
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: DeliveryId
+
+	column TruckCode
+		dataType: string
+		summarizeBy: none
+		sourceColumn: TruckCode
+
+	column FromSiteCode
+		dataType: string
+		summarizeBy: none
+		sourceColumn: FromSiteCode
+
+	column ToSiteCode
+		dataType: string
+		summarizeBy: none
+		sourceColumn: ToSiteCode
+
+	column Status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Status
+
+	column DepartedAtUtc
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		summarizeBy: none
+		sourceColumn: DepartedAtUtc
+
+	column ArrivedAtUtc
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		summarizeBy: none
+		sourceColumn: ArrivedAtUtc
+
+	column DepartedDateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: DepartedDateKey
+
+	column TransitMinutes
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: TransitMinutes
+
+	column ItemCount
+		dataType: int64
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: ItemCount
+
+	column WeightTons
+		dataType: double
+		formatString: #,0.0
+		summarizeBy: sum
+		sourceColumn: WeightTons
+
+	column Route = [FromSiteCode] & " → " & [ToSiteCode]
+		dataType: string
+		summarizeBy: none
+
+	partition Deliveries = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = "rpt", Item = "vw_Deliveries"]}[Data]
+				in
+				    Data
+

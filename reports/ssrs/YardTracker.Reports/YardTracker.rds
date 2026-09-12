@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RptDataSource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="YardTracker">
+  <ConnectionProperties>
+    <Extension>SQL</Extension>
+    <!-- LocalDB instances are per Windows user and are not reachable by the Report Server service.
+         When deploying, point this at a full SQL Server instance hosting the YardTracker database. -->
+    <ConnectString>Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=YardTracker</ConnectString>
+    <IntegratedSecurity>true</IntegratedSecurity>
+  </ConnectionProperties>
+  <DataSourceID>6f3c1a2e-8a1d-4b7e-9d0c-2b5e7f4a1c90</DataSourceID>
+</RptDataSource>

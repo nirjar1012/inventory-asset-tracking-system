@@ -1,0 +1,111 @@
+<Window x:Class="YardTracker.Station.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:YardTracker.Station.ViewModels"
+        xmlns:views="clr-namespace:YardTracker.Station.Views"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance vm:ShellViewModel}"
+        Title="{Binding Settings.StationCode, StringFormat='YardTracker Scanning Station  ·  {0}'}"
+        Width="1440" Height="900" MinWidth="1150" MinHeight="720"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Brush.Background}"
+        Foreground="{StaticResource Brush.Text}"
+        FontSize="14">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="{StaticResource Brush.Header}" BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,0,0,1" Padding="20,12">
+            <DockPanel LastChildFill="False">
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                    <Border Background="{StaticResource Brush.Accent}" CornerRadius="6" Padding="10,4" VerticalAlignment="Center">
+                        <TextBlock Text="YARD TRACKER" FontWeight="Bold" FontSize="16" Foreground="{StaticResource Brush.OnAccent}" />
+                    </Border>
+                    <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Settings.StationCode, StringFormat='Station {0}'}" FontSize="16" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Session.StationName}" Foreground="{StaticResource Brush.Muted}" FontSize="12" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border CornerRadius="12" Padding="10,4" Margin="0,0,18,0" Background="{StaticResource Brush.Panel}">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="10" Height="10" VerticalAlignment="Center">
+                                <Ellipse.Style>
+                                    <Style TargetType="Ellipse">
+                                        <Setter Property="Fill" Value="{StaticResource Status.Accepted}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsOnline}" Value="False">
+                                                <Setter Property="Fill" Value="{StaticResource Status.Rejected}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
+                            <TextBlock Margin="8,0,0,0" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Online" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsOnline}" Value="False">
+                                                <Setter Property="Text" Value="Offline (scans are queued)" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource Brush.Accent}"
+                                       Text="{Binding PendingCount, StringFormat='· {0} pending'}" />
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,18,0"
+                                Visibility="{Binding IsSignedIn, Converter={StaticResource BoolToVisibility}}">
+                        <TextBlock Text="{Binding Session.OperatorName}" FontWeight="SemiBold" HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding Session.Role}" Foreground="{StaticResource Brush.Muted}" FontSize="12" HorizontalAlignment="Right" />
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding Clock}" FontFamily="{StaticResource Font.Mono}" FontSize="16" VerticalAlignment="Center" Margin="0,0,18,0" />
+
+                    <Button Content="Sign out" Command="{Binding SignOutCommand}" Padding="14,6"
+                            Visibility="{Binding IsSignedIn, Converter={StaticResource BoolToVisibility}}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Sign-in -->
+        <views:SignInView Grid.Row="1" Visibility="{Binding IsSignedIn, Converter={StaticResource InverseBoolToVisibility}}" />
+
+        <!-- Signed in -->
+        <TabControl Grid.Row="1" Margin="8,8,8,0" SelectedIndex="{Binding SelectedTab}"
+                    Visibility="{Binding IsSignedIn, Converter={StaticResource BoolToVisibility}}">
+            <TabItem Header="Scan">
+                <views:ScanView DataContext="{Binding Scan}" />
+            </TabItem>
+            <TabItem Header="Inventory">
+                <views:InventoryView DataContext="{Binding Inventory}" />
+            </TabItem>
+            <TabItem Header="Fleet map">
+                <views:FleetView DataContext="{Binding Fleet}" />
+            </TabItem>
+            <TabItem Header="Machines">
+                <views:MachinesView DataContext="{Binding Machines}" />
+            </TabItem>
+        </TabControl>
+
+        <!-- Status bar -->
+        <Border Grid.Row="2" Background="{StaticResource Brush.Header}" BorderBrush="{StaticResource Brush.Border}" BorderThickness="0,1,0,0" Padding="20,6">
+            <TextBlock Foreground="{StaticResource Brush.Muted}" FontSize="12">
+                <Run Text="WCF service " /><Run Text="{Binding Settings.Service.BaseAddress, Mode=OneWay}" />
+                <Run Text="  ·  security " /><Run Text="{Binding Settings.Service.Security, Mode=OneWay}" />
+                <Run Text="  ·  offline queue retries every " /><Run Text="{Binding Settings.OfflineRetrySeconds, Mode=OneWay}" /><Run Text=" s" />
+            </TextBlock>
+        </Border>
+    </Grid>
+</Window>

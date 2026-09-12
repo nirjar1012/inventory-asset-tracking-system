@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/YardTracker.Client/YardTracker.Client.csproj" />
+    <Project Path="src/YardTracker.Contracts/YardTracker.Contracts.csproj" />
+    <Project Path="src/YardTracker.EdgeGateway/YardTracker.EdgeGateway.csproj" />
+    <Project Path="src/YardTracker.Modbus/YardTracker.Modbus.csproj" />
+    <Project Path="src/YardTracker.Service/YardTracker.Service.csproj" />
+    <Project Path="src/YardTracker.Simulator/YardTracker.Simulator.csproj" />
+    <Project Path="src/YardTracker.Station/YardTracker.Station.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/YardTracker.Tests/YardTracker.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reporting Services project (Visual Studio "Microsoft Reporting Services Projects" extension). -->
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">Win32</Platform>
+    <ProjectGuid>{7C1D5E0A-3B9F-4E62-A8D4-1F2B3C4D5E60}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>YardTracker.Reports</RootNamespace>
+    <AssemblyName>YardTracker.Reports</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' ">
+    <FullPath>Debug</FullPath>
+    <OutputPath>bin\Debug</OutputPath>
+    <ErrorLevel>2</ErrorLevel>
+    <OverwriteDatasets>False</OverwriteDatasets>
+    <OverwriteDataSources>False</OverwriteDataSources>
+    <TargetServerVersion>SSRS2016</TargetServerVersion>
+    <TargetReportFolder>YardTracker</TargetReportFolder>
+    <TargetDatasetFolder>YardTracker/Datasets</TargetDatasetFolder>
+    <TargetDatasourceFolder>YardTracker/Data Sources</TargetDatasourceFolder>
+    <TargetReportPartFolder>YardTracker/Report Parts</TargetReportPartFolder>
+    <TargetServerURL>http://localhost/ReportServer</TargetServerURL>
+  </PropertyGroup>
+  <ItemGroup>
+    <DataSource Include="YardTracker.rds" />
+  </ItemGroup>
+  <ItemGroup>
+    <Report Include="CurrentInventoryByLocation.rdl" />
+    <Report Include="ItemsOverdueForMovement.rdl" />
+    <Report Include="DailyThroughput.rdl" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Reporting Services\Microsoft.ReportingServices.MSBuilder.targets" />
+</Project>

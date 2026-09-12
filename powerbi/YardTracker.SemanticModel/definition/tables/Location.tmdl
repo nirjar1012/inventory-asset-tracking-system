@@ -1,0 +1,70 @@
+/// Yard locations (racks, laydown areas, bays, docks, staging, QA hold) and their sites.
+table Location
+
+	column LocationId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: LocationId
+
+	column LocationCode
+		dataType: string
+		summarizeBy: none
+		sourceColumn: LocationCode
+
+	column LocationName
+		dataType: string
+		summarizeBy: none
+		sourceColumn: LocationName
+
+	/// Rack, Laydown, Bay, Dock, Staging or Quarantine. Dock, Bay, Staging and Quarantine are process locations where dwell time signals a bottleneck.
+	column LocationType
+		dataType: string
+		summarizeBy: none
+		sourceColumn: LocationType
+
+	column CapacityTons
+		dataType: double
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: CapacityTons
+
+	column SiteId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: SiteId
+
+	column SiteCode
+		dataType: string
+		summarizeBy: none
+		sourceColumn: SiteCode
+
+	column SiteName
+		dataType: string
+		summarizeBy: none
+		sourceColumn: SiteName
+
+	column SiteLatitude
+		dataType: double
+		dataCategory: Latitude
+		summarizeBy: none
+		sourceColumn: SiteLatitude
+
+	column SiteLongitude
+		dataType: double
+		dataCategory: Longitude
+		summarizeBy: none
+		sourceColumn: SiteLongitude
+
+	partition Location = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = "rpt", Item = "vw_DimLocation"]}[Data]
+				in
+				    Data
+

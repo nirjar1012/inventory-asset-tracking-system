@@ -1,0 +1,63 @@
+/// Pipe, casing, tubing, plate, beam and bar catalog.
+table Product
+
+	column ProductId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: ProductId
+
+	column ProductCode
+		dataType: string
+		summarizeBy: none
+		sourceColumn: ProductCode
+
+	column Category
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Category
+
+	column Description
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Description
+
+	column Grade
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Grade
+
+	column OuterDiameterIn
+		dataType: double
+		formatString: 0.000
+		summarizeBy: none
+		sourceColumn: OuterDiameterIn
+
+	column WallThicknessIn
+		dataType: double
+		formatString: 0.000
+		summarizeBy: none
+		sourceColumn: WallThicknessIn
+
+	column NominalLengthFt
+		dataType: double
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: NominalLengthFt
+
+	column WeightLbsPerFt
+		dataType: double
+		formatString: 0.00
+		summarizeBy: none
+		sourceColumn: WeightLbsPerFt
+
+	partition Product = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = "rpt", Item = "vw_DimProduct"]}[Data]
+				in
+				    Data
+

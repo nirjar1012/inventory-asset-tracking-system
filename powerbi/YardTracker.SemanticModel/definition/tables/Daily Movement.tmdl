@@ -1,0 +1,177 @@
+/// ETL roll-up (rpt.DailyInventoryMovement): one row per business day, location and product category.
+table 'Daily Movement'
+
+	/// Every scan that moved material: receipts, check-ins, check-outs, moves (counted once), truck loads and truck deliveries.
+	measure Scans = SUM('Daily Movement'[Receipts]) + SUM('Daily Movement'[CheckIns]) + SUM('Daily Movement'[CheckOuts]) + SUM('Daily Movement'[MovesIn]) + SUM('Daily Movement'[TruckLoads]) + SUM('Daily Movement'[TruckDeliveries])
+		formatString: #,0
+		displayFolder: Throughput
+
+	measure Receipts = SUM('Daily Movement'[Receipts])
+		formatString: #,0
+		displayFolder: Throughput
+
+	measure 'Check Outs' = SUM('Daily Movement'[CheckOuts])
+		formatString: #,0
+		displayFolder: Throughput
+
+	measure 'Check Ins' = SUM('Daily Movement'[CheckIns])
+		formatString: #,0
+		displayFolder: Throughput
+
+	measure Moves = SUM('Daily Movement'[MovesIn])
+		formatString: #,0
+		displayFolder: Throughput
+
+	measure 'Truck Movements' = SUM('Daily Movement'[TruckLoads]) + SUM('Daily Movement'[TruckDeliveries])
+		formatString: #,0
+		displayFolder: Throughput
+
+	measure 'Inbound Tons' = SUM('Daily Movement'[InboundTons])
+		formatString: #,0.0
+		displayFolder: Tonnage
+
+	measure 'Outbound Tons' = SUM('Daily Movement'[OutboundTons])
+		formatString: #,0.0
+		displayFolder: Tonnage
+
+	measure 'Net Tons' = [Inbound Tons] - [Outbound Tons]
+		formatString: #,0.0;-#,0.0;0.0
+		displayFolder: Tonnage
+
+	measure 'Scans 7-Day Avg' = AVERAGEX(DATESINPERIOD('Date'[Date], MAX('Date'[Date]), -7, DAY), [Scans])
+		formatString: #,0
+		displayFolder: Throughput
+
+	measure 'Scans vs Prior Week' =
+			VAR CurrentScans = [Scans]
+			VAR PriorScans = CALCULATE([Scans], DATEADD('Date'[Date], -7, DAY))
+			RETURN DIVIDE(CurrentScans - PriorScans, PriorScans)
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Throughput
+
+	column DateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: DateKey
+
+	column BusinessDate
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		summarizeBy: none
+		sourceColumn: BusinessDate
+
+	column LocationId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: LocationId
+
+	column ProductCategory
+		dataType: string
+		summarizeBy: none
+		sourceColumn: ProductCategory
+
+	column Receipts
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: Receipts
+
+	column CheckIns
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: CheckIns
+
+	column CheckOuts
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: CheckOuts
+
+	column MovesIn
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: MovesIn
+
+	column MovesOut
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: MovesOut
+
+	column TruckLoads
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: TruckLoads
+
+	column TruckDeliveries
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: TruckDeliveries
+
+	column InboundEvents
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: InboundEvents
+
+	column OutboundEvents
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: OutboundEvents
+
+	column InboundTons
+		dataType: double
+		isHidden
+		formatString: #,0.0
+		summarizeBy: sum
+		sourceColumn: InboundTons
+
+	column OutboundTons
+		dataType: double
+		isHidden
+		formatString: #,0.0
+		summarizeBy: sum
+		sourceColumn: OutboundTons
+
+	column DistinctItems
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: DistinctItems
+
+	column DistinctOperators
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: DistinctOperators
+
+	partition 'Daily Movement' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = "rpt", Item = "vw_FactDailyMovement"]}[Data]
+				in
+				    Data
+

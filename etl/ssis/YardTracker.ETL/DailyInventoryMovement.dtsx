@@ -1,0 +1,216 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts" DTS:refId="Package" DTS:CreationDate="9/12/2026 9:00:00 AM" DTS:CreationName="Microsoft.Package" DTS:CreatorComputerName="YARDTRACKER" DTS:CreatorName="YardTracker" DTS:Description="Incremental ETL: new scan events (rowversion watermark) to etl.stg_ScanEvents, then rebuild the touched cells of rpt.DailyInventoryMovement." DTS:DTSID="{3E6A1B52-7C4D-4F0B-9A2E-5D8C1F6B7A10}" DTS:ExecutableType="Microsoft.Package" DTS:LastModifiedProductVersion="16.0.5685.0" DTS:LocaleID="1033" DTS:ObjectName="DailyInventoryMovement" DTS:PackageType="5" DTS:ProtectionLevel="0" DTS:VersionBuild="1" DTS:VersionGUID="{8B2C4D6E-1F3A-4B5C-8D7E-9F0A1B2C3D20}">
+  <DTS:Property DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager DTS:refId="Package.ConnectionManagers[YardTracker]" DTS:CreationName="OLEDB" DTS:DTSID="{A1B2C3D4-E5F6-4711-8A9B-0C1D2E3F4A30}" DTS:ObjectName="YardTracker">
+      <DTS:PropertyExpression DTS:Name="ConnectionString">"Data Source=" + @[User::ServerName] + ";Initial Catalog=" + @[User::DatabaseName] + ";Provider=MSOLEDBSQL19.1;Integrated Security=SSPI;Use Encryption for Data=Optional;Application Name=YardTracker.ETL;"</DTS:PropertyExpression>
+      <DTS:ObjectData>
+        <DTS:ConnectionManager DTS:ConnectionString="Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=YardTracker;Provider=MSOLEDBSQL19.1;Integrated Security=SSPI;Use Encryption for Data=Optional;Application Name=YardTracker.ETL;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables>
+    <DTS:Variable DTS:CreationName="" DTS:DTSID="{5B0E2C71-2D4A-4C63-9E1F-7A8B9C0D1E01}" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="ServerName">
+      <DTS:VariableValue DTS:DataType="8">(localdb)\MSSQLLocalDB</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable DTS:CreationName="" DTS:DTSID="{5B0E2C71-2D4A-4C63-9E1F-7A8B9C0D1E02}" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="DatabaseName">
+      <DTS:VariableValue DTS:DataType="8">YardTracker</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable DTS:CreationName="" DTS:DTSID="{5B0E2C71-2D4A-4C63-9E1F-7A8B9C0D1E03}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="RunId">
+      <DTS:VariableValue DTS:DataType="3">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable DTS:CreationName="" DTS:DTSID="{5B0E2C71-2D4A-4C63-9E1F-7A8B9C0D1E04}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="FromRowVersion">
+      <DTS:VariableValue DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable DTS:CreationName="" DTS:DTSID="{5B0E2C71-2D4A-4C63-9E1F-7A8B9C0D1E05}" DTS:IncludeInDebugDump="6789" DTS:Namespace="User" DTS:ObjectName="ToRowVersion">
+      <DTS:VariableValue DTS:DataType="20">0</DTS:VariableValue>
+    </DTS:Variable>
+    <DTS:Variable DTS:CreationName="" DTS:Description="Extract query built from the watermark range (SQL command from variable)." DTS:DTSID="{5B0E2C71-2D4A-4C63-9E1F-7A8B9C0D1E06}" DTS:EvaluateAsExpression="True" DTS:Expression="&quot;SELECT ScanEventId, RowVersion, ItemId, EventType, FromLocationId, ToLocationId, OperatorId, ScannedAtUtc, Pieces, WeightLbs, ProductCategory FROM etl.fn_ExtractScanEvents(&quot; + (DT_WSTR, 20) @[User::FromRowVersion] + &quot;, &quot; + (DT_WSTR, 20) @[User::ToRowVersion] + &quot;)&quot;" DTS:IncludeInDebugDump="2345" DTS:Namespace="User" DTS:ObjectName="ExtractQuery">
+      <DTS:VariableValue DTS:DataType="8">SELECT ScanEventId, RowVersion, ItemId, EventType, FromLocationId, ToLocationId, OperatorId, ScannedAtUtc, Pieces, WeightLbs, ProductCategory FROM etl.fn_ExtractScanEvents(0, 0)</DTS:VariableValue>
+    </DTS:Variable>
+  </DTS:Variables>
+  <DTS:Executables>
+    <DTS:Executable DTS:refId="Package\Begin run" DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:Description="Opens an etl.RunLog entry and returns the rowversion range to extract." DTS:DTSID="{C0DE0001-0000-4000-8000-000000000001}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Begin run" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2022; © 2022 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1" DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData SQLTask:Connection="{A1B2C3D4-E5F6-4711-8A9B-0C1D2E3F4A30}" SQLTask:SqlStatementSource="EXEC etl.usp_BeginRun @ProcessName = 'DailyInventoryMovement', @RunSource = 'SSIS';" SQLTask:ResultType="ResultSetType_SingleRow" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ResultBinding SQLTask:ResultName="0" SQLTask:DtsVariableName="User::RunId" />
+          <SQLTask:ResultBinding SQLTask:ResultName="1" SQLTask:DtsVariableName="User::FromRowVersion" />
+          <SQLTask:ResultBinding SQLTask:ResultName="2" SQLTask:DtsVariableName="User::ToRowVersion" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:refId="Package\Truncate staging" DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:Description="Clears the landing table." DTS:DTSID="{C0DE0001-0000-4000-8000-000000000002}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Truncate staging" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2022; © 2022 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1" DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData SQLTask:Connection="{A1B2C3D4-E5F6-4711-8A9B-0C1D2E3F4A30}" SQLTask:SqlStatementSource="TRUNCATE TABLE etl.stg_ScanEvents;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask"></SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:refId="Package\Extract scan events" DTS:CreationName="Microsoft.Pipeline" DTS:Description="Copies scan events in the watermark range into etl.stg_ScanEvents with fast load." DTS:DTSID="{C0DE0001-0000-4000-8000-000000000003}" DTS:ExecutableType="Microsoft.Pipeline" DTS:LocaleID="-1" DTS:ObjectName="Extract scan events" DTS:TaskContact="Performs high-performance data extraction, transformation and loading;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <pipeline version="1">
+          <components>
+            <component refId="Package\Extract scan events\Read new scan events" componentClassID="Microsoft.OLEDBSource" contactInfo="OLE DB Source;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;7" description="OLE DB Source" name="Read new scan events" usesDispositions="true" version="7">
+              <properties>
+                <property dataType="System.Int32" description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out." name="CommandTimeout">0</property>
+                <property dataType="System.String" description="Specifies the name of the database object used to open a rowset." name="OpenRowset"></property>
+                <property dataType="System.String" description="Specifies the variable that contains the name of the database object used to open a rowset." name="OpenRowsetVariable"></property>
+                <property dataType="System.String" description="The SQL command to be executed." name="SqlCommand" UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor, Microsoft.DataTransformationServices.Controls, Version=16.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"></property>
+                <property dataType="System.String" description="The variable that contains the SQL command to be executed." name="SqlCommandVariable">User::ExtractQuery</property>
+                <property dataType="System.Int32" description="Specifies the column code page to use when code page information is unavailable from the data source." name="DefaultCodePage">1252</property>
+                <property dataType="System.Boolean" description="Forces the use of the DefaultCodePage property value when describing character data." name="AlwaysUseDefaultCodePage">false</property>
+                <property dataType="System.Int32" description="Specifies the mode used to access the database." name="AccessMode" typeConverter="AccessMode">3</property>
+                <property dataType="System.String" description="The mappings between the parameters in the SQL command and variables." name="ParameterMapping"></property>
+              </properties>
+              <connections>
+                <connection refId="Package\Extract scan events\Read new scan events.Connections[OleDbConnection]" connectionManagerID="{A1B2C3D4-E5F6-4711-8A9B-0C1D2E3F4A30}:external" connectionManagerRefId="Package.ConnectionManagers[YardTracker]" description="The OLE DB runtime connection used to access the database." name="OleDbConnection" />
+              </connections>
+              <outputs>
+                <output refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output]" name="OLE DB Source Output">
+                  <outputColumns>
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ScanEventId]" dataType="i8" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[ScanEventId]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ScanEventId]" name="ScanEventId" truncationRowDisposition="FailComponent" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[RowVersion]" dataType="i8" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[RowVersion]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[RowVersion]" name="RowVersion" truncationRowDisposition="FailComponent" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ItemId]" dataType="i4" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[ItemId]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ItemId]" name="ItemId" truncationRowDisposition="FailComponent" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[EventType]" dataType="str" length="12" codePage="1252" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[EventType]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[EventType]" name="EventType" truncationRowDisposition="FailComponent" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[FromLocationId]" dataType="i4" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[FromLocationId]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[FromLocationId]" name="FromLocationId" truncationRowDisposition="FailComponent" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ToLocationId]" dataType="i4" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[ToLocationId]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ToLocationId]" name="ToLocationId" truncationRowDisposition="FailComponent" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[OperatorId]" dataType="i4" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[OperatorId]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[OperatorId]" name="OperatorId" truncationRowDisposition="FailComponent" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ScannedAtUtc]" dataType="dbTimeStamp2" scale="3" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[ScannedAtUtc]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ScannedAtUtc]" name="ScannedAtUtc" truncationRowDisposition="FailComponent" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[Pieces]" dataType="i4" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[Pieces]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[Pieces]" name="Pieces" truncationRowDisposition="FailComponent" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[WeightLbs]" dataType="numeric" precision="12" scale="2" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[WeightLbs]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[WeightLbs]" name="WeightLbs" truncationRowDisposition="FailComponent" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ProductCategory]" dataType="str" length="20" codePage="1252" errorOrTruncationOperation="Conversion" errorRowDisposition="FailComponent" externalMetadataColumnId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[ProductCategory]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ProductCategory]" name="ProductCategory" truncationRowDisposition="FailComponent" />
+                  </outputColumns>
+                  <externalMetadataColumns isUsed="True">
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[ScanEventId]" dataType="i8" name="ScanEventId" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[RowVersion]" dataType="i8" name="RowVersion" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[ItemId]" dataType="i4" name="ItemId" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[EventType]" dataType="str" length="12" codePage="1252" name="EventType" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[FromLocationId]" dataType="i4" name="FromLocationId" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[ToLocationId]" dataType="i4" name="ToLocationId" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[OperatorId]" dataType="i4" name="OperatorId" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[ScannedAtUtc]" dataType="dbTimeStamp2" scale="3" name="ScannedAtUtc" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[Pieces]" dataType="i4" name="Pieces" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[WeightLbs]" dataType="numeric" precision="12" scale="2" name="WeightLbs" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].ExternalColumns[ProductCategory]" dataType="str" length="20" codePage="1252" name="ProductCategory" />
+                  </externalMetadataColumns>
+                </output>
+                <output refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output]" isErrorOut="true" name="OLE DB Source Error Output">
+                  <outputColumns>
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ScanEventId]" dataType="i8" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ScanEventId]" name="ScanEventId" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[RowVersion]" dataType="i8" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[RowVersion]" name="RowVersion" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ItemId]" dataType="i4" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ItemId]" name="ItemId" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[EventType]" dataType="str" length="12" codePage="1252" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[EventType]" name="EventType" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[FromLocationId]" dataType="i4" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[FromLocationId]" name="FromLocationId" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ToLocationId]" dataType="i4" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ToLocationId]" name="ToLocationId" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[OperatorId]" dataType="i4" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[OperatorId]" name="OperatorId" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ScannedAtUtc]" dataType="dbTimeStamp2" scale="3" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ScannedAtUtc]" name="ScannedAtUtc" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[Pieces]" dataType="i4" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[Pieces]" name="Pieces" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[WeightLbs]" dataType="numeric" precision="12" scale="2" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[WeightLbs]" name="WeightLbs" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ProductCategory]" dataType="str" length="20" codePage="1252" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ProductCategory]" name="ProductCategory" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ErrorCode]" dataType="i4" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ErrorCode]" name="ErrorCode" specialFlags="1" />
+                    <outputColumn refId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]" dataType="i4" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Error Output].Columns[ErrorColumn]" name="ErrorColumn" specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+            <component refId="Package\Extract scan events\Load staging table" componentClassID="Microsoft.OLEDBDestination" contactInfo="OLE DB Destination;Microsoft Corporation; Microsoft SQL Server; (C) Microsoft Corporation; All Rights Reserved; http://www.microsoft.com/sql/support;4" description="OLE DB Destination" name="Load staging table" usesDispositions="true" version="4">
+              <properties>
+                <property dataType="System.Int32" description="The number of seconds before a command times out.  A value of 0 indicates an infinite time-out." name="CommandTimeout">0</property>
+                <property dataType="System.String" description="Specifies the name of the database object used to open a rowset." name="OpenRowset">[etl].[stg_ScanEvents]</property>
+                <property dataType="System.String" description="Specifies the variable that contains the name of the database object used to open a rowset." name="OpenRowsetVariable"></property>
+                <property dataType="System.String" description="The SQL command to be executed." name="SqlCommand" UITypeEditor="Microsoft.DataTransformationServices.Controls.ModalMultilineStringEditor, Microsoft.DataTransformationServices.Controls, Version=16.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91"></property>
+                <property dataType="System.Int32" description="Specifies the column code page to use when code page information is unavailable from the data source." name="DefaultCodePage">1252</property>
+                <property dataType="System.Boolean" description="Forces the use of the DefaultCodePage property value when describing character data." name="AlwaysUseDefaultCodePage">false</property>
+                <property dataType="System.Int32" description="Specifies the mode used to access the database." name="AccessMode" typeConverter="AccessMode">3</property>
+                <property dataType="System.Boolean" description="Indicates whether the values supplied for identity columns will be copied to the destination. If false, values for identity columns will be auto-generated at the destination. Applies only if fast load is turned on." name="FastLoadKeepIdentity">false</property>
+                <property dataType="System.Boolean" description="Indicates whether the columns containing null will have null inserted in the destination. If false, columns containing null will have their default values inserted at the destination. Applies only if fast load is turned on." name="FastLoadKeepNulls">true</property>
+                <property dataType="System.String" description="Specifies options to be used with fast load.  Applies only if fast load is turned on." name="FastLoadOptions">TABLOCK,CHECK_CONSTRAINTS</property>
+                <property dataType="System.Int32" description="Specifies when commits are issued during data insertion.  A value of 0 specifies that one commit will be issued at the end of data insertion.  Applies only if fast load is turned on." name="FastLoadMaxInsertCommitSize">2147483647</property>
+              </properties>
+              <connections>
+                <connection refId="Package\Extract scan events\Load staging table.Connections[OleDbConnection]" connectionManagerID="{A1B2C3D4-E5F6-4711-8A9B-0C1D2E3F4A30}:external" connectionManagerRefId="Package.ConnectionManagers[YardTracker]" description="The OLE DB runtime connection used to access the database." name="OleDbConnection" />
+              </connections>
+              <inputs>
+                <input refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input]" errorOrTruncationOperation="Insert" errorRowDisposition="FailComponent" hasSideEffects="true" name="OLE DB Destination Input">
+                  <inputColumns>
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[ScanEventId]" cachedDataType="i8" cachedName="ScanEventId" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[ScanEventId]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ScanEventId]" />
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[RowVersion]" cachedDataType="i8" cachedName="RowVersion" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[RowVersion]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[RowVersion]" />
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[ItemId]" cachedDataType="i4" cachedName="ItemId" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[ItemId]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ItemId]" />
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[EventType]" cachedDataType="str" cachedLength="12" cachedCodepage="1252" cachedName="EventType" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[EventType]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[EventType]" />
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[FromLocationId]" cachedDataType="i4" cachedName="FromLocationId" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[FromLocationId]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[FromLocationId]" />
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[ToLocationId]" cachedDataType="i4" cachedName="ToLocationId" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[ToLocationId]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ToLocationId]" />
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[OperatorId]" cachedDataType="i4" cachedName="OperatorId" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[OperatorId]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[OperatorId]" />
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[ScannedAtUtc]" cachedDataType="dbTimeStamp2" cachedScale="3" cachedName="ScannedAtUtc" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[ScannedAtUtc]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ScannedAtUtc]" />
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[Pieces]" cachedDataType="i4" cachedName="Pieces" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[Pieces]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[Pieces]" />
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[WeightLbs]" cachedDataType="numeric" cachedPrecision="12" cachedScale="2" cachedName="WeightLbs" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[WeightLbs]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[WeightLbs]" />
+                    <inputColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].Columns[ProductCategory]" cachedDataType="str" cachedLength="20" cachedCodepage="1252" cachedName="ProductCategory" externalMetadataColumnId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[ProductCategory]" lineageId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output].Columns[ProductCategory]" />
+                  </inputColumns>
+                  <externalMetadataColumns isUsed="True">
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[ScanEventId]" dataType="i8" name="ScanEventId" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[RowVersion]" dataType="i8" name="RowVersion" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[ItemId]" dataType="i4" name="ItemId" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[EventType]" dataType="str" length="12" codePage="1252" name="EventType" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[FromLocationId]" dataType="i4" name="FromLocationId" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[ToLocationId]" dataType="i4" name="ToLocationId" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[OperatorId]" dataType="i4" name="OperatorId" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[ScannedAtUtc]" dataType="dbTimeStamp2" scale="3" name="ScannedAtUtc" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[Pieces]" dataType="i4" name="Pieces" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[WeightLbs]" dataType="numeric" precision="12" scale="2" name="WeightLbs" />
+                    <externalMetadataColumn refId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input].ExternalColumns[ProductCategory]" dataType="str" length="20" codePage="1252" name="ProductCategory" />
+                  </externalMetadataColumns>
+                </input>
+              </inputs>
+              <outputs>
+                <output refId="Package\Extract scan events\Load staging table.Outputs[OLE DB Destination Error Output]" exclusionGroup="1" isErrorOut="true" name="OLE DB Destination Error Output" synchronousInputId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input]">
+                  <outputColumns>
+                    <outputColumn refId="Package\Extract scan events\Load staging table.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]" dataType="i4" lineageId="Package\Extract scan events\Load staging table.Outputs[OLE DB Destination Error Output].Columns[ErrorCode]" name="ErrorCode" specialFlags="1" />
+                    <outputColumn refId="Package\Extract scan events\Load staging table.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]" dataType="i4" lineageId="Package\Extract scan events\Load staging table.Outputs[OLE DB Destination Error Output].Columns[ErrorColumn]" name="ErrorColumn" specialFlags="2" />
+                  </outputColumns>
+                  <externalMetadataColumns />
+                </output>
+              </outputs>
+            </component>
+          </components>
+          <paths>
+            <path refId="Package\Extract scan events.Paths[OLE DB Source Output]" endId="Package\Extract scan events\Load staging table.Inputs[OLE DB Destination Input]" name="OLE DB Source Output" startId="Package\Extract scan events\Read new scan events.Outputs[OLE DB Source Output]" />
+          </paths>
+        </pipeline>
+      </DTS:ObjectData>
+    </DTS:Executable>
+    <DTS:Executable DTS:refId="Package\Merge daily movement" DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:Description="Rebuilds every (business day, location) cell touched by the staged events, advances the watermark and closes the run." DTS:DTSID="{C0DE0001-0000-4000-8000-000000000004}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Merge daily movement" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2022; © 2022 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1" DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData SQLTask:Connection="{A1B2C3D4-E5F6-4711-8A9B-0C1D2E3F4A30}" SQLTask:SqlStatementSource="EXEC etl.usp_MergeDailyInventoryMovement @RunId = ?;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+          <SQLTask:ParameterBinding SQLTask:ParameterName="0" SQLTask:DtsVariableName="User::RunId" SQLTask:ParameterDirection="Input" SQLTask:DataType="3" SQLTask:ParameterSize="-1" />
+        </SQLTask:SqlTaskData>
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:PrecedenceConstraints>
+    <DTS:PrecedenceConstraint DTS:refId="Package.PrecedenceConstraints[Constraint]" DTS:CreationName="" DTS:DTSID="{C0DE0002-0000-4000-8000-000000000001}" DTS:From="Package\Begin run" DTS:LogicalAnd="True" DTS:ObjectName="Constraint" DTS:To="Package\Truncate staging" />
+    <DTS:PrecedenceConstraint DTS:refId="Package.PrecedenceConstraints[Constraint 1]" DTS:CreationName="" DTS:DTSID="{C0DE0002-0000-4000-8000-000000000002}" DTS:From="Package\Truncate staging" DTS:LogicalAnd="True" DTS:ObjectName="Constraint 1" DTS:To="Package\Extract scan events" />
+    <DTS:PrecedenceConstraint DTS:refId="Package.PrecedenceConstraints[Constraint 2]" DTS:CreationName="" DTS:DTSID="{C0DE0002-0000-4000-8000-000000000003}" DTS:From="Package\Extract scan events" DTS:LogicalAnd="True" DTS:ObjectName="Constraint 2" DTS:To="Package\Merge daily movement" />
+  </DTS:PrecedenceConstraints>
+  <DTS:EventHandlers>
+    <DTS:EventHandler DTS:refId="Package.EventHandlers[OnError]" DTS:CreationName="OnError" DTS:DTSID="{C0DE0003-0000-4000-8000-000000000001}" DTS:EventID="0" DTS:EventName="OnError" DTS:LocaleID="-1">
+      <DTS:Variables>
+        <DTS:Variable DTS:CreationName="" DTS:Description="The propagate property of the event" DTS:DTSID="{C0DE0003-0000-4000-8000-000000000002}" DTS:IncludeInDebugDump="6789" DTS:Namespace="System" DTS:ObjectName="Propagate">
+          <DTS:VariableValue DTS:DataType="11">-1</DTS:VariableValue>
+        </DTS:Variable>
+      </DTS:Variables>
+      <DTS:Executables>
+        <DTS:Executable DTS:refId="Package.EventHandlers[OnError]\Mark run failed" DTS:CreationName="Microsoft.ExecuteSQLTask" DTS:Description="Records the error on the run so the next run is not blocked and the failure is visible in etl.RunLog." DTS:DTSID="{C0DE0003-0000-4000-8000-000000000003}" DTS:ExecutableType="Microsoft.ExecuteSQLTask" DTS:LocaleID="-1" DTS:ObjectName="Mark run failed" DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2022; © 2022 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1" DTS:ThreadHint="0">
+          <DTS:Variables />
+          <DTS:ObjectData>
+            <SQLTask:SqlTaskData SQLTask:Connection="{A1B2C3D4-E5F6-4711-8A9B-0C1D2E3F4A30}" SQLTask:SqlStatementSource="EXEC etl.usp_FailRun @RunId = ?, @ErrorMessage = ?;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask">
+              <SQLTask:ParameterBinding SQLTask:ParameterName="0" SQLTask:DtsVariableName="User::RunId" SQLTask:ParameterDirection="Input" SQLTask:DataType="3" SQLTask:ParameterSize="-1" />
+              <SQLTask:ParameterBinding SQLTask:ParameterName="1" SQLTask:DtsVariableName="System::ErrorDescription" SQLTask:ParameterDirection="Input" SQLTask:DataType="130" SQLTask:ParameterSize="2000" />
+            </SQLTask:SqlTaskData>
+          </DTS:ObjectData>
+        </DTS:Executable>
+      </DTS:Executables>
+    </DTS:EventHandler>
+  </DTS:EventHandlers>
+</DTS:Executable>

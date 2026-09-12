@@ -1,0 +1,132 @@
+<UserControl x:Class="YardTracker.Station.Views.FleetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:YardTracker.Station.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:FleetViewModel}">
+    <Grid Margin="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="330" />
+        </Grid.ColumnDefinitions>
+
+        <Border Style="{StaticResource Panel}" Padding="0" ClipToBounds="True">
+            <Viewbox Stretch="Uniform">
+                <Grid Width="900" Height="560">
+                    <Rectangle Fill="{StaticResource MapGridBrush}" />
+
+                    <!-- GPS breadcrumb trail of each active delivery -->
+                    <ItemsControl ItemsSource="{Binding Routes}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Polyline Points="{Binding}" Stroke="{StaticResource Status.InTransit}" StrokeThickness="3"
+                                          StrokeLineJoin="Round" Opacity="0.85" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Sites -->
+                    <ItemsControl ItemsSource="{Binding Sites}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}" />
+                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:MapSite}">
+                                <Canvas>
+                                    <Rectangle Canvas.Left="-13" Canvas.Top="-13" Width="26" Height="26" RadiusX="4" RadiusY="4"
+                                               Fill="{StaticResource Brush.Accent}" Stroke="{StaticResource Brush.Header}" StrokeThickness="2" />
+                                    <TextBlock Canvas.Left="-13" Canvas.Top="18" Text="{Binding Code}" FontWeight="Bold" FontSize="16" />
+                                    <TextBlock Canvas.Left="-13" Canvas.Top="38" Text="{Binding Name}" FontSize="12" Foreground="{StaticResource Brush.Muted}" />
+                                </Canvas>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- Trucks: arrow rotated to GPS heading -->
+                    <ItemsControl ItemsSource="{Binding Trucks}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}" />
+                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:MapTruck}">
+                                <Canvas>
+                                    <Ellipse x:Name="Halo" Canvas.Left="-16" Canvas.Top="-16" Width="32" Height="32"
+                                             Fill="{StaticResource Status.InTransit}" Stroke="White" StrokeThickness="2" />
+                                    <Path Data="M 0,-10 L 7,8 L 0,4 L -7,8 Z" Fill="White">
+                                        <Path.RenderTransform>
+                                            <RotateTransform Angle="{Binding Heading}" />
+                                        </Path.RenderTransform>
+                                    </Path>
+                                    <Border Canvas.Left="20" Canvas.Top="-12" Background="{StaticResource Brush.Header}" CornerRadius="4" Padding="6,2">
+                                        <TextBlock Text="{Binding TruckCode}" FontWeight="SemiBold" FontSize="13" />
+                                    </Border>
+                                </Canvas>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding OnDelivery}" Value="False">
+                                        <Setter TargetName="Halo" Property="Fill" Value="{StaticResource Status.Idle}" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="24">
+                        <Rectangle Width="{Binding ScaleBarWidth}" Height="4" Fill="{StaticResource Brush.Text}" HorizontalAlignment="Left" />
+                        <TextBlock Text="5 miles" FontSize="12" Foreground="{StaticResource Brush.Muted}" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <TextBlock Text="N ↑" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="24" FontSize="18" FontWeight="Bold"
+                               Foreground="{StaticResource Brush.Muted}" />
+                    <TextBlock Text="Mock GPS from driver handhelds  ·  refreshes every 3 s" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                               Margin="24" FontSize="12" Foreground="{StaticResource Brush.Muted}" />
+                </Grid>
+            </Viewbox>
+        </Border>
+
+        <DockPanel Grid.Column="1" Margin="12,0,0,0">
+            <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionLabel}" Text="TRUCKS" />
+            <TextBlock DockPanel.Dock="Bottom" Text="{Binding Error}" Foreground="{StaticResource Status.Alarm}" TextWrapping="Wrap" />
+            <ItemsControl ItemsSource="{Binding TruckCards}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:TruckCard}">
+                        <Border Style="{StaticResource Panel}" Margin="0,0,0,10" Padding="14">
+                            <StackPanel>
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Right" Style="{StaticResource Pill}" Background="{Binding Status, Converter={StaticResource KeyToBrush}}">
+                                        <TextBlock Text="{Binding Status}" Foreground="White" FontSize="12" FontWeight="SemiBold" />
+                                    </Border>
+                                    <TextBlock Text="{Binding TruckCode}" FontSize="18" FontWeight="SemiBold" />
+                                </DockPanel>
+                                <TextBlock Text="{Binding Route}" Margin="0,6,0,0" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Detail}" Foreground="{StaticResource Brush.Muted}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding LastPing}" Foreground="{StaticResource Brush.Muted}" FontSize="12" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DockPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,100 @@
+/// Hourly roll-up of Modbus machine readings (rpt.vw_MachineReadingsHourly).
+table 'Machine Hourly'
+
+	/// Sample-weighted, so hours polled every 5 seconds and hours backfilled every 15 minutes average correctly.
+	measure 'Avg Temperature C' = DIVIDE(SUMX('Machine Hourly', 'Machine Hourly'[AvgTemperatureC] * 'Machine Hourly'[Samples]), SUM('Machine Hourly'[Samples]))
+		formatString: #,0.0
+		displayFolder: Machines
+
+	measure 'Max Temperature C' = MAX('Machine Hourly'[MaxTemperatureC])
+		formatString: #,0.0
+		displayFolder: Machines
+
+	measure 'Running %' = DIVIDE(SUMX('Machine Hourly', 'Machine Hourly'[RunningPct] * 'Machine Hourly'[Samples]), SUM('Machine Hourly'[Samples])) / 100
+		formatString: 0.0%
+		displayFolder: Machines
+
+	measure 'Fault Time %' = DIVIDE(SUM('Machine Hourly'[FaultSamples]), SUM('Machine Hourly'[Samples]))
+		formatString: 0.0%
+		displayFolder: Machines
+
+	measure 'Hours Over Warning' =
+			COUNTROWS(
+			    FILTER(
+			        'Machine Hourly',
+			        'Machine Hourly'[MaxTemperatureC] >= RELATED(Machine[TempWarnC])
+			    )
+			)
+		formatString: #,0
+		displayFolder: Machines
+
+	column MachineId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: MachineId
+
+	column HourStartUtc
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		summarizeBy: none
+		sourceColumn: HourStartUtc
+
+	column DateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: DateKey
+
+	column Samples
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: Samples
+
+	column AvgTemperatureC
+		dataType: double
+		isHidden
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: AvgTemperatureC
+
+	column MaxTemperatureC
+		dataType: double
+		isHidden
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: MaxTemperatureC
+
+	column RunningPct
+		dataType: double
+		isHidden
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: RunningPct
+
+	column FaultSamples
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: sum
+		sourceColumn: FaultSamples
+
+	column MaxCycleCount
+		dataType: int64
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: MaxCycleCount
+
+	partition 'Machine Hourly' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = "rpt", Item = "vw_MachineReadingsHourly"]}[Data]
+				in
+				    Data
+

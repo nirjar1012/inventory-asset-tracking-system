@@ -1,0 +1,19 @@
+{
+  "name": "YardTracker",
+  "dataColors": [
+    "#2F81F7",
+    "#F5B301",
+    "#2EA043",
+    "#8B98A5",
+    "#DA3633",
+    "#7EB6FF",
+    "#B7791F",
+    "#6E40C9"
+  ],
+  "background": "#FFFFFF",
+  "foreground": "#1F2933",
+  "tableAccent": "#F5B301",
+  "good": "#2EA043",
+  "neutral": "#F5B301",
+  "bad": "#DA3633"
+}

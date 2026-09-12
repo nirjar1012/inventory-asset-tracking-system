@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- WCF client plumbing shared by the station, simulator and edge gateway (dotnet/wcf client libraries). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>YardTracker.Client</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ServiceModel.NetTcp" Version="10.0.652802" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\YardTracker.Contracts\YardTracker.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

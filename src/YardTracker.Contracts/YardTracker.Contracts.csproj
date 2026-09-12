@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Shared WCF contracts.
+      net48    -> referenced by the WCF service host (classic System.ServiceModel)
+      net10.0  -> referenced by the WPF station, simulator and edge gateway
+                  (dotnet/wcf client libraries)
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>net48;net10.0</TargetFrameworks>
+    <RootNamespace>YardTracker.Contracts</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Runtime.Serialization" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
+    <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
+    <!-- Lift the transitive 10.0.0 dependency to a patched release (NU1903). -->
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.12" />
+  </ItemGroup>
+
+</Project>

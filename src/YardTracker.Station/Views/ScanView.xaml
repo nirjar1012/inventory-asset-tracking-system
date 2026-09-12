@@ -1,0 +1,206 @@
+<UserControl x:Class="YardTracker.Station.Views.ScanView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:YardTracker.Station.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:ScanViewModel}">
+    <Grid Margin="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="270" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="330" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Mode and scan options -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Style="{StaticResource SectionLabel}" Text="MODE" />
+                <RadioButton Style="{StaticResource ModeTile}" Tag="&#xE896;" Content="Check in"
+                             IsChecked="{Binding Mode, Converter={StaticResource EnumEquals}, ConverterParameter=CheckIn}" />
+                <RadioButton Style="{StaticResource ModeTile}" Tag="&#xE898;" Content="Check out"
+                             IsChecked="{Binding Mode, Converter={StaticResource EnumEquals}, ConverterParameter=CheckOut}" />
+                <RadioButton Style="{StaticResource ModeTile}" Tag="&#xE8AB;" Content="Move"
+                             IsChecked="{Binding Mode, Converter={StaticResource EnumEquals}, ConverterParameter=Move}" />
+                <RadioButton Style="{StaticResource ModeTile}" Tag="&#xE7B8;" Content="Receive"
+                             IsChecked="{Binding Mode, Converter={StaticResource EnumEquals}, ConverterParameter=Receive}" />
+                <RadioButton Style="{StaticResource ModeTile}" Tag="&#xE721;" Content="Lookup"
+                             IsChecked="{Binding Mode, Converter={StaticResource EnumEquals}, ConverterParameter=Lookup}" />
+
+                <StackPanel Margin="0,14,0,0" Visibility="{Binding NeedsLocation, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Style="{StaticResource SectionLabel}" Text="TARGET LOCATION" />
+                    <ComboBox ItemsSource="{Binding Locations}" SelectedItem="{Binding SelectedLocation}" DisplayMemberPath="DisplayName" />
+                    <TextBlock Text="Tip: scan a LOC: rack label to switch" Foreground="{StaticResource Brush.Muted}" FontSize="12" Margin="0,4,0,0" />
+                </StackPanel>
+
+                <StackPanel Margin="0,14,0,0" Visibility="{Binding IsReceiveMode, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Style="{StaticResource SectionLabel}" Text="PRODUCT" />
+                    <ComboBox ItemsSource="{Binding Products}" SelectedItem="{Binding SelectedProduct}" DisplayMemberPath="DisplayName" />
+                    <TextBlock Style="{StaticResource SectionLabel}" Text="HEAT NUMBER (FROM MTR)" Margin="0,12,0,6" />
+                    <TextBox Text="{Binding HeatNumber, UpdateSourceTrigger=PropertyChanged}" CharacterCasing="Upper" />
+                    <TextBlock Style="{StaticResource SectionLabel}" Text="PIECES / JOINTS" Margin="0,12,0,6" />
+                    <TextBox Text="{Binding PiecesText, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <StackPanel Margin="0,14,0,0" Visibility="{Binding NeedsReference, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Style="{StaticResource SectionLabel}" Text="{Binding ReferenceLabel}" />
+                    <TextBox Text="{Binding Reference, UpdateSourceTrigger=PropertyChanged}" CharacterCasing="Upper" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Scan input, result and item -->
+        <Grid Grid.Column="1" Margin="16,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel>
+                <TextBlock Text="{Binding ModeHint}" Foreground="{StaticResource Brush.Muted}" FontSize="15" Margin="0,0,0,8" TextWrapping="Wrap" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="ScanBox" Text="{Binding ScanText, UpdateSourceTrigger=PropertyChanged}"
+                             FontFamily="{StaticResource Font.Mono}" FontSize="28" Padding="12,8" CharacterCasing="Upper"
+                             ToolTip="Barcode scanners in keyboard-wedge mode type here and press Enter">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SubmitScanCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <Button Grid.Column="1" Content="Submit" Command="{Binding SubmitScanCommand}" Margin="8,0,0,0" MinWidth="110"
+                            FontSize="16" FontWeight="SemiBold" Background="{StaticResource Brush.Accent}" Foreground="{StaticResource Brush.OnAccent}" />
+                    <Button Grid.Column="2" Command="{Binding SimulateRfidReadCommand}" Margin="8,0,0,0" Padding="14,0"
+                            ToolTip="Simulates an RFID reader picking up a tag that suits the current mode">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE701;" FontFamily="{StaticResource Font.Icons}" VerticalAlignment="Center" />
+                            <TextBlock Text="Simulate RFID read" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+            <Border Grid.Row="1" Margin="0,12,0,0" CornerRadius="8" Padding="18,12"
+                    Visibility="{Binding Banner, Converter={StaticResource NullToVisibility}}"
+                    Background="{Binding Banner.Kind, Converter={StaticResource KeyToBrush}}">
+                <StackPanel>
+                    <TextBlock Text="{Binding Banner.Title}" FontSize="22" FontWeight="SemiBold" Foreground="White" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Banner.Detail}" FontSize="15" Foreground="#E6FFFFFF" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="2" Style="{StaticResource Panel}" Margin="0,12,0,0"
+                    Visibility="{Binding CurrentItem, Converter={StaticResource NullToVisibility}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="{Binding CurrentItem.TagId}" FontFamily="{StaticResource Font.Mono}" FontSize="22" FontWeight="SemiBold" />
+                        <TextBlock Foreground="{StaticResource Brush.Muted}">
+                            <Run Text="{Binding CurrentItem.Description, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding CurrentItem.Grade, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
+                    <Border Grid.Column="1" Style="{StaticResource Pill}" VerticalAlignment="Top"
+                            Background="{Binding CurrentItem.Status, Converter={StaticResource KeyToBrush}}">
+                        <TextBlock Text="{Binding CurrentItem.Status}" Foreground="White" FontWeight="SemiBold" />
+                    </Border>
+
+                    <UniformGrid Grid.Row="1" Grid.ColumnSpan="2" Columns="4" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabel}" Text="Location" />
+                            <TextBlock Style="{StaticResource FieldValue}" Text="{Binding CurrentItem.LocationCode, TargetNullValue='(not in yard)'}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabel}" Text="Product" />
+                            <TextBlock Style="{StaticResource FieldValue}" Text="{Binding CurrentItem.ProductCode}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabel}" Text="Heat number" />
+                            <TextBlock Style="{StaticResource FieldValue}" Text="{Binding CurrentItem.HeatNumber}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabel}" Text="Days since last move" />
+                            <TextBlock Style="{StaticResource FieldValue}" Text="{Binding CurrentItem.DaysSinceLastMove}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabel}" Text="Pieces" />
+                            <TextBlock Style="{StaticResource FieldValue}" Text="{Binding CurrentItem.Pieces}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabel}" Text="Weight" />
+                            <TextBlock Style="{StaticResource FieldValue}" Text="{Binding CurrentItem.WeightLbs, StringFormat='{}{0:N0} lbs'}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabel}" Text="Total length" />
+                            <TextBlock Style="{StaticResource FieldValue}" Text="{Binding CurrentItem.TotalLengthFt, StringFormat='{}{0:N0} ft'}" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabel}" Text="Last moved" />
+                            <TextBlock Style="{StaticResource FieldValue}" Text="{Binding CurrentItem.LastMovedAtUtc, Converter={StaticResource UtcToLocal}}" />
+                        </StackPanel>
+                    </UniformGrid>
+                </Grid>
+            </Border>
+
+            <DockPanel Grid.Row="3" Margin="0,12,0,0">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionLabel}" Text="MOVEMENT HISTORY" />
+                <DataGrid ItemsSource="{Binding History}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                          GridLinesVisibility="None" CanUserAddRows="False" SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Scanned" Width="130" Binding="{Binding ScannedAtUtc, Mode=OneWay, Converter={StaticResource UtcToLocal}}" />
+                        <DataGridTextColumn Header="Event" Width="95" Binding="{Binding EventType, Mode=OneWay}" />
+                        <DataGridTextColumn Header="From" Width="100" Binding="{Binding FromLocationCode, Mode=OneWay}" />
+                        <DataGridTextColumn Header="To" Width="100" Binding="{Binding ToLocationCode, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Operator" Width="130" Binding="{Binding OperatorName, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Station" Width="95" Binding="{Binding StationCode, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Reference" Width="*" Binding="{Binding Reference, Mode=OneWay}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Grid>
+
+        <!-- Session log -->
+        <DockPanel Grid.Column="2">
+            <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionLabel}" Text="THIS SESSION" />
+            <ListBox ItemsSource="{Binding SessionLog}" Background="Transparent" BorderThickness="0"
+                     HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:SessionScan}">
+                        <Border Background="{StaticResource Brush.Panel}" CornerRadius="6" Padding="10,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="4" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Rectangle RadiusX="2" RadiusY="2" Fill="{Binding Outcome, Converter={StaticResource KeyToBrush}}" />
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                    <DockPanel>
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding Time, StringFormat=HH:mm:ss}" Foreground="{StaticResource Brush.Muted}" FontSize="12" />
+                                        <TextBlock Text="{Binding Action}" FontWeight="SemiBold" />
+                                    </DockPanel>
+                                    <TextBlock Text="{Binding Tag}" FontFamily="{StaticResource Font.Mono}" />
+                                    <TextBlock Foreground="{StaticResource Brush.Muted}" FontSize="12" TextWrapping="Wrap">
+                                        <Run Text="{Binding Outcome, Mode=OneWay}" FontWeight="SemiBold" /><Run Text="  " /><Run Text="{Binding Message, Mode=OneWay}" />
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+    </Grid>
+</UserControl>

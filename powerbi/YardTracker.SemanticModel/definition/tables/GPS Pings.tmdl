@@ -1,0 +1,63 @@
+/// Mock GPS positions reported by driver handhelds during deliveries.
+table 'GPS Pings'
+
+	column GpsPingId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: GpsPingId
+
+	column DeliveryId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: DeliveryId
+
+	column TruckCode
+		dataType: string
+		summarizeBy: none
+		sourceColumn: TruckCode
+
+	column Latitude
+		dataType: double
+		dataCategory: Latitude
+		formatString: 0.000000
+		summarizeBy: none
+		sourceColumn: Latitude
+
+	column Longitude
+		dataType: double
+		dataCategory: Longitude
+		formatString: 0.000000
+		summarizeBy: none
+		sourceColumn: Longitude
+
+	column SpeedMph
+		dataType: double
+		formatString: 0.0
+		summarizeBy: average
+		sourceColumn: SpeedMph
+
+	column HeadingDeg
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: HeadingDeg
+
+	column RecordedAtUtc
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn:ss
+		summarizeBy: none
+		sourceColumn: RecordedAtUtc
+
+	partition 'GPS Pings' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = "rpt", Item = "vw_GpsPings"]}[Data]
+				in
+				    Data
+

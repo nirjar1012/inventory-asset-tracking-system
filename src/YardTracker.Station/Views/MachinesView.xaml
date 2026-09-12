@@ -1,0 +1,58 @@
+<UserControl x:Class="YardTracker.Station.Views.MachinesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:YardTracker.Station.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:MachinesViewModel}">
+    <DockPanel Margin="12">
+        <TextBlock DockPanel.Dock="Top" Foreground="{StaticResource Brush.Muted}" Margin="0,0,0,12" TextWrapping="Wrap"
+                   Text="Machine PLC → Modbus TCP (FC03 holding registers) → edge gateway → WCF → SQL Server. Refreshes every 5 seconds." />
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding Error}" Foreground="{StaticResource Status.Alarm}" />
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Machines}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:MachineTile}">
+                        <Border Style="{StaticResource Panel}" Width="340" Margin="0,0,12,12">
+                            <StackPanel>
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Right" Style="{StaticResource Pill}" VerticalAlignment="Top"
+                                            Background="{Binding Status.StatusName, Converter={StaticResource KeyToBrush}}">
+                                        <TextBlock Text="{Binding Status.StatusName}" Foreground="White" FontWeight="SemiBold" FontSize="12" />
+                                    </Border>
+                                    <TextBlock Text="{Binding Status.Name}" FontSize="16" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,8,0" />
+                                </DockPanel>
+                                <TextBlock Text="{Binding Subtitle}" Foreground="{StaticResource Brush.Muted}" FontSize="12" Margin="0,2,0,0" />
+
+                                <TextBlock Text="{Binding TemperatureText}" FontSize="40" FontWeight="SemiBold" Margin="0,10,0,0"
+                                           Foreground="{Binding Level, Converter={StaticResource KeyToBrush}}" />
+                                <ProgressBar Minimum="0" Maximum="100" Height="6" Value="{Binding TemperaturePercent, Mode=OneWay}"
+                                             Foreground="{Binding Level, Converter={StaticResource KeyToBrush}}" />
+                                <TextBlock Text="{Binding Limits}" Foreground="{StaticResource Brush.Muted}" FontSize="12" Margin="0,4,0,0" />
+
+                                <UniformGrid Columns="2" Margin="0,12,0,0">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Cycle count" />
+                                        <TextBlock Style="{StaticResource FieldValue}" Text="{Binding Cycles}" />
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource FieldLabel}" Text="Active fault" />
+                                        <TextBlock Style="{StaticResource FieldValue}" Text="{Binding Fault}" />
+                                    </StackPanel>
+                                </UniformGrid>
+                                <TextBlock Text="{Binding Updated}" Foreground="{StaticResource Brush.Muted}" FontSize="12" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

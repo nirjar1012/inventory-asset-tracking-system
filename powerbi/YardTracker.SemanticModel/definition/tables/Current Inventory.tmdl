@@ -1,0 +1,113 @@
+/// Item-level snapshot of every tagged item (rpt.vw_CurrentInventory), refreshed with the model.
+table 'Current Inventory'
+
+	measure 'Items In Yard' = CALCULATE(COUNTROWS('Current Inventory'), 'Current Inventory'[Status] = "InYard")
+		formatString: #,0
+		displayFolder: Inventory
+
+	measure 'Tons On Hand' = CALCULATE(SUM('Current Inventory'[WeightTons]), 'Current Inventory'[Status] = "InYard")
+		formatString: #,0
+		displayFolder: Inventory
+
+	measure 'Capacity Tons' = SUM(Location[CapacityTons])
+		formatString: #,0
+		displayFolder: Inventory
+
+	measure 'Utilization %' = DIVIDE([Tons On Hand], [Capacity Tons])
+		formatString: 0%
+		displayFolder: Inventory
+
+	measure 'Items Overdue 30d' = CALCULATE([Items In Yard], 'Current Inventory'[DaysSinceLastMove] >= 30)
+		formatString: #,0
+		displayFolder: Inventory
+
+	measure 'Avg Days Since Move' = CALCULATE(AVERAGE('Current Inventory'[DaysSinceLastMove]), 'Current Inventory'[Status] = "InYard")
+		formatString: #,0.0
+		displayFolder: Inventory
+
+	measure 'Items In Transit' = CALCULATE(COUNTROWS('Current Inventory'), 'Current Inventory'[Status] = "InTransit")
+		formatString: #,0
+		displayFolder: Inventory
+
+	column ItemId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: ItemId
+
+	column TagId
+		dataType: string
+		summarizeBy: none
+		sourceColumn: TagId
+
+	column ProductId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: ProductId
+
+	column HeatNumber
+		dataType: string
+		summarizeBy: none
+		sourceColumn: HeatNumber
+
+	column Status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: Status
+
+	column LocationId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: LocationId
+
+	column Pieces
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: Pieces
+
+	column WeightTons
+		dataType: double
+		formatString: #,0.0
+		summarizeBy: sum
+		sourceColumn: WeightTons
+
+	column LastMovedAtUtc
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		summarizeBy: none
+		sourceColumn: LastMovedAtUtc
+
+	column DaysSinceLastMove
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: DaysSinceLastMove
+
+	column AgingBucket
+		dataType: string
+		summarizeBy: none
+		sourceColumn: AgingBucket
+		sortByColumn: AgingBucketSort
+
+	column AgingBucketSort
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: AgingBucketSort
+
+	partition 'Current Inventory' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = "rpt", Item = "vw_CurrentInventory"]}[Data]
+				in
+				    Data
+

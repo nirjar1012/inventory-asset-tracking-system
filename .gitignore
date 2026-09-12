@@ -1,0 +1,22 @@
+## Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+.vs/
+TestResults/
+
+## Power BI project local state
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+
+## SSIS / SSRS designer state
+*.database
+*.rptproj.rsuser
+*.dtproj.user
+
+## Generated output
+out/
+graphify-out/

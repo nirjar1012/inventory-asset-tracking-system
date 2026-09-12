@@ -1,0 +1,52 @@
+relationship 3f6b2a10-0001-4d2c-9e51-7a0c1b2d3e01
+	fromColumn: 'Daily Movement'.DateKey
+	toColumn: Date.DateKey
+
+relationship 3f6b2a10-0002-4d2c-9e51-7a0c1b2d3e02
+	fromColumn: 'Daily Movement'.LocationId
+	toColumn: Location.LocationId
+
+relationship 3f6b2a10-0003-4d2c-9e51-7a0c1b2d3e03
+	fromColumn: 'Current Inventory'.LocationId
+	toColumn: Location.LocationId
+
+relationship 3f6b2a10-0004-4d2c-9e51-7a0c1b2d3e04
+	fromColumn: 'Current Inventory'.ProductId
+	toColumn: Product.ProductId
+
+relationship 3f6b2a10-0005-4d2c-9e51-7a0c1b2d3e05
+	fromColumn: 'Location Stays'.LocationId
+	toColumn: Location.LocationId
+
+relationship 3f6b2a10-0006-4d2c-9e51-7a0c1b2d3e06
+	fromColumn: 'Location Stays'.ArrivalDateKey
+	toColumn: Date.DateKey
+
+relationship 3f6b2a10-0007-4d2c-9e51-7a0c1b2d3e07
+	fromColumn: 'Machine Hourly'.MachineId
+	toColumn: Machine.MachineId
+
+relationship 3f6b2a10-0008-4d2c-9e51-7a0c1b2d3e08
+	fromColumn: 'Machine Hourly'.DateKey
+	toColumn: Date.DateKey
+
+relationship 3f6b2a10-0009-4d2c-9e51-7a0c1b2d3e09
+	fromColumn: Machine.LocationId
+	toColumn: Location.LocationId
+
+relationship 3f6b2a10-0010-4d2c-9e51-7a0c1b2d3e10
+	fromColumn: Deliveries.DepartedDateKey
+	toColumn: Date.DateKey
+
+relationship 3f6b2a10-0011-4d2c-9e51-7a0c1b2d3e11
+	fromColumn: 'GPS Pings'.DeliveryId
+	toColumn: Deliveries.DeliveryId
+
+relationship 3f6b2a10-0012-4d2c-9e51-7a0c1b2d3e12
+	fromColumn: 'Scan Exceptions'.DateKey
+	toColumn: Date.DateKey
+
+relationship 3f6b2a10-0013-4d2c-9e51-7a0c1b2d3e13
+	fromColumn: 'Scan Exceptions'.LocationId
+	toColumn: Location.LocationId
+

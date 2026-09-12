@@ -1,0 +1,75 @@
+/// One row per stay of an item at a location (arrival to departure), derived from the scan log.
+table 'Location Stays'
+
+	measure 'Avg Dwell Hours' = CALCULATE(AVERAGE('Location Stays'[DwellHours]), 'Location Stays'[IsOpen] = FALSE())
+		formatString: #,0.0
+		displayFolder: Flow
+
+	measure 'P90 Dwell Hours' = PERCENTILEX.INC(FILTER('Location Stays', NOT 'Location Stays'[IsOpen]), 'Location Stays'[DwellHours], 0.9)
+		formatString: #,0.0
+		displayFolder: Flow
+
+	/// Items currently sitting at the location (stay not yet closed).
+	measure 'Items Waiting' = CALCULATE(COUNTROWS('Location Stays'), 'Location Stays'[IsOpen] = TRUE())
+		formatString: #,0
+		displayFolder: Flow
+
+	/// Average dwell at process locations only (docks, bays, staging, QA hold), where long waits mean a bottleneck.
+	measure 'Process Dwell Hours' = CALCULATE([Avg Dwell Hours], KEEPFILTERS(Location[LocationType] IN {"Dock", "Bay", "Staging", "Quarantine"}))
+		formatString: #,0.0
+		displayFolder: Flow
+
+	column ItemId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: ItemId
+
+	column LocationId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: LocationId
+
+	column ArrivedAtUtc
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		summarizeBy: none
+		sourceColumn: ArrivedAtUtc
+
+	column DepartedAtUtc
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		summarizeBy: none
+		sourceColumn: DepartedAtUtc
+
+	column IsOpen
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: IsOpen
+
+	column DwellHours
+		dataType: double
+		formatString: #,0.0
+		summarizeBy: none
+		sourceColumn: DwellHours
+
+	column ArrivalDateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: ArrivalDateKey
+
+	partition 'Location Stays' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = "rpt", Item = "vw_LocationStays"]}[Data]
+				in
+				    Data
+

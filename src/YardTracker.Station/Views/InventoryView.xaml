@@ -1,0 +1,86 @@
+<UserControl x:Class="YardTracker.Station.Views.InventoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:YardTracker.Station.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:InventoryViewModel}">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Margin="0,0,0,12">
+            <ComboBox DockPanel.Dock="Left" Width="160" ItemsSource="{Binding SiteFilters}" SelectedItem="{Binding SiteFilter}" />
+            <Button DockPanel.Dock="Left" Content="Refresh" Command="{Binding RefreshCommand}" Margin="8,0,0,0" Padding="14,6" />
+            <TextBlock DockPanel.Dock="Right" Text="{Binding Error}" Foreground="{StaticResource Status.Alarm}" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding Summary}" Margin="16,0,0,0" VerticalAlignment="Center" FontSize="15" />
+        </DockPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionLabel}" Text="INVENTORY BY LOCATION" />
+                <DataGrid ItemsSource="{Binding Locations}" SelectedItem="{Binding SelectedLocation}" AutoGenerateColumns="False"
+                          IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="None" SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Site" Width="55" Binding="{Binding SiteCode, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Location" Width="100" Binding="{Binding LocationCode, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Name" Width="*" Binding="{Binding LocationName, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Type" Width="90" Binding="{Binding LocationType, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Items" Width="60" Binding="{Binding ItemCount, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Tons" Width="70" Binding="{Binding WeightTons, Mode=OneWay, StringFormat=N1}" />
+                        <DataGridTemplateColumn Header="Utilization" Width="150" SortMemberPath="UtilizationPct">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4">
+                                        <ProgressBar Minimum="0" Maximum="100" Height="18" Value="{Binding UtilizationPct, Mode=OneWay, TargetNullValue=0}" />
+                                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12"
+                                                   Text="{Binding UtilizationPct, StringFormat='{}{0:0}%', TargetNullValue=''}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Oldest move" Width="110" Binding="{Binding OldestMoveAtUtc, Mode=OneWay, Converter={StaticResource UtcToLocal}, ConverterParameter='MMM d'}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+
+            <DockPanel Grid.Column="1" Margin="12,0,0,0">
+                <TextBlock DockPanel.Dock="Top" Style="{StaticResource SectionLabel}"
+                           Text="{Binding SelectedLocation.LocationCode, StringFormat='ITEMS AT {0} (LONGEST IDLE FIRST)'}" />
+                <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="None">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Tag" Width="*" Binding="{Binding TagId, Mode=OneWay}" FontFamily="{StaticResource Font.Mono}" />
+                        <DataGridTextColumn Header="Product" Width="120" Binding="{Binding ProductCode, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Heat" Width="70" Binding="{Binding HeatNumber, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Pcs" Width="45" Binding="{Binding Pieces, Mode=OneWay}" />
+                        <DataGridTextColumn Header="Days idle" Width="70" Binding="{Binding DaysSinceLastMove, Mode=OneWay}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Grid>
+
+        <Expander Grid.Row="2" Margin="0,12,0,0" Header="{Binding Exceptions.Count, StringFormat='Open scan exceptions ({0}): rejected scans awaiting supervisor review'}">
+            <DataGrid ItemsSource="{Binding Exceptions}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                      GridLinesVisibility="None" MaxHeight="220" Margin="0,8,0,0">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="When" Width="110" Binding="{Binding OccurredAtUtc, Mode=OneWay, Converter={StaticResource UtcToLocal}}" />
+                    <DataGridTextColumn Header="Type" Width="130" Binding="{Binding ExceptionType, Mode=OneWay}" />
+                    <DataGridTextColumn Header="Action" Width="80" Binding="{Binding AttemptedAction, Mode=OneWay}" />
+                    <DataGridTextColumn Header="Tag" Width="200" Binding="{Binding RawTag, Mode=OneWay}" />
+                    <DataGridTextColumn Header="Station" Width="80" Binding="{Binding StationCode, Mode=OneWay}" />
+                    <DataGridTextColumn Header="Operator" Width="130" Binding="{Binding OperatorName, Mode=OneWay}" />
+                    <DataGridTextColumn Header="Message" Width="*" Binding="{Binding Message, Mode=OneWay}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Expander>
+    </Grid>
+</UserControl>

@@ -1,0 +1,22 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+ref table Date
+ref table Location
+ref table Product
+ref table Machine
+ref table 'Daily Movement'
+ref table 'Current Inventory'
+ref table 'Location Stays'
+ref table 'Machine Hourly'
+ref table Deliveries
+ref table 'GPS Pings'
+ref table 'Scan Exceptions'
+

@@ -1,0 +1,10 @@
+/// SQL Server instance hosting the YardTracker database. Change it in Transform data > Edit parameters.
+expression SqlServer = "(localdb)\MSSQLLocalDB" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+
+	annotation PBI_ResultType = Text
+
+/// Database name.
+expression SqlDatabase = "YardTracker" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+
+	annotation PBI_ResultType = Text
+

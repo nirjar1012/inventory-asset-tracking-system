@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>YardTracker.Station</RootNamespace>
+    <!-- WPF0001: Application.ThemeMode (Fluent theme) is marked experimental. -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\YardTracker.Client\YardTracker.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="station.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

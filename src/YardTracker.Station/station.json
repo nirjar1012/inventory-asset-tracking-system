@@ -1,0 +1,9 @@
+{
+  "StationCode": "HH-01",
+  "Service": {
+    "BaseAddress": "net.tcp://localhost:8523/YardTracker/",
+    "Security": "Transport",
+    "TimeoutSeconds": 10
+  },
+  "OfflineRetrySeconds": 10
+}

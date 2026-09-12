@@ -1,0 +1,78 @@
+/// Rejected scans (unknown tags, invalid state, wrong site, inactive badges...).
+table 'Scan Exceptions'
+
+	measure 'Exception Count' = COUNTROWS('Scan Exceptions')
+		formatString: #,0
+		displayFolder: Quality
+
+	measure 'Open Exceptions' = CALCULATE(COUNTROWS('Scan Exceptions'), 'Scan Exceptions'[IsResolved] = FALSE())
+		formatString: #,0
+		displayFolder: Quality
+
+	/// Rejected scans as a share of all scan attempts.
+	measure 'Exception Rate' = DIVIDE([Exception Count], [Scans] + [Exception Count])
+		formatString: 0.00%
+		displayFolder: Quality
+
+	column ScanExceptionId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: ScanExceptionId
+
+	column ExceptionType
+		dataType: string
+		summarizeBy: none
+		sourceColumn: ExceptionType
+
+	column AttemptedAction
+		dataType: string
+		summarizeBy: none
+		sourceColumn: AttemptedAction
+
+	column RawTag
+		dataType: string
+		summarizeBy: none
+		sourceColumn: RawTag
+
+	column OccurredAtUtc
+		dataType: dateTime
+		formatString: yyyy-mm-dd hh:nn
+		summarizeBy: none
+		sourceColumn: OccurredAtUtc
+
+	column LocationId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: LocationId
+
+	column DateKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: DateKey
+
+	column StationCode
+		dataType: string
+		summarizeBy: none
+		sourceColumn: StationCode
+
+	column IsResolved
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		summarizeBy: none
+		sourceColumn: IsResolved
+
+	partition 'Scan Exceptions' = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = "rpt", Item = "vw_ScanExceptions"]}[Data]
+				in
+				    Data
+

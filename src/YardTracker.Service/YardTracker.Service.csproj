@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Classic WCF service on .NET Framework 4.8 (System.ServiceModel), self-hosted in a console
+    process. The same ServiceHost can be installed as a Windows Service or hosted in IIS/WAS.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>YardTracker.Service</RootNamespace>
+    <AssemblyName>YardTracker.Service</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\YardTracker.Contracts\YardTracker.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

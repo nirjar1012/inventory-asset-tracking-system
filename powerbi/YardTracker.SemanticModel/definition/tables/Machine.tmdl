@@ -1,0 +1,59 @@
+/// Machines monitored over Modbus TCP.
+table Machine
+
+	column MachineId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: MachineId
+
+	column MachineCode
+		dataType: string
+		summarizeBy: none
+		sourceColumn: MachineCode
+
+	column MachineName
+		dataType: string
+		summarizeBy: none
+		sourceColumn: MachineName
+
+	column MachineType
+		dataType: string
+		summarizeBy: none
+		sourceColumn: MachineType
+
+	column LocationId
+		dataType: int64
+		isHidden
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: LocationId
+
+	column ModbusUnitId
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: ModbusUnitId
+
+	column TempWarnC
+		dataType: double
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: TempWarnC
+
+	column TempAlarmC
+		dataType: double
+		formatString: 0.0
+		summarizeBy: none
+		sourceColumn: TempAlarmC
+
+	partition Machine = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(SqlServer, SqlDatabase),
+				    Data = Source{[Schema = "rpt", Item = "vw_DimMachine"]}[Data]
+				in
+				    Data
+
