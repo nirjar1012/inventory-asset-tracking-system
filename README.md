@@ -166,4 +166,13 @@ dotnet test tests\YardTracker.Tests
 - **Power BI:** open `powerbi/YardTracker.pbip`. The `SqlServer` and `SqlDatabase` parameters point at LocalDB by default. The map visual needs map visuals enabled in Options > Security.
 - **WCF:** the host opens TCP 8523 (services) and 8524 (metadata). For handhelds on another machine, open the firewall and use certificate or domain credentials (see comments in `App.config`).
 
-More detail: [docs/architecture.md](docs/architecture.md) and [docs/talking-points.md](docs/talking-points.md).
+## Documentation
+
+[docs/README.md](docs/README.md) is the full documentation set: a 13-part guide covering the
+purpose of the project, every folder and file, the database object by object, the service and
+contracts, the station, Modbus and the gateway, the simulator, the ETL, both reporting stacks,
+SharePoint, build/run/test/deploy, four end-to-end walkthroughs, and a glossary.
+
+Shorter references: [docs/architecture.md](docs/architecture.md) (processes, ports, ER diagram,
+register map) and [docs/talking-points.md](docs/talking-points.md) (the design decisions, phrased
+for a demo).
